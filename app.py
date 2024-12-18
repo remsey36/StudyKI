@@ -5,7 +5,7 @@ from utils import get_tokens, pdf_price, read_pdf, save_to_pdf, send_to_chatgpt
 # Set the OPENAI_API_KEY environment variable
 api_key = os.getenv("OPENAI_API_KEY")  # Get API key from environment variable
 
-def task_gen(input_pdf, api_key, output_path=None):
+def task_gen(input_pdf, output_path=None):
     if not api_key:
         raise ValueError("No API key found. Please set the OPENAI_API_KEY environment variable.")
 
@@ -14,7 +14,7 @@ def task_gen(input_pdf, api_key, output_path=None):
 
     # Read the PDF and send it to ChatGPT
     text = read_pdf(input_pdf)
-    response = send_to_chatgpt(api_key, text)
+    response = send_to_chatgpt(text)
     
     # Save the response to a PDF file
     save_to_pdf(response, output_path)
@@ -23,3 +23,4 @@ def task_gen(input_pdf, api_key, output_path=None):
     price_info = pdf_price(input_pdf, response)
     print(price_info)
 
+task_gen("Test_PDFs/Geschichte.pdf")

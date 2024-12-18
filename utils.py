@@ -3,6 +3,7 @@ import tiktoken
 import pdfplumber
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+import os
 
 MODEL = "gpt-4o"
 encoding = tiktoken.encoding_for_model(MODEL)
@@ -25,7 +26,7 @@ def get_tokens(pdf_path):
     tokens = encoding.encode(text)
     return tokens
 
-def pdf_price(pdf_path, output_text, input_token_price=0.0001, output_token_price=0.0002):
+def pdf_price(pdf_path, output_text, input_token_price=0.0000025, output_token_price=0.00001):
     input_tokens = get_tokens(pdf_path)
     output_tokens = encoding.encode(output_text)
     
@@ -39,7 +40,11 @@ def pdf_price(pdf_path, output_text, input_token_price=0.0001, output_token_pric
         "total_cost": total_cost
     }
 
-def send_to_chatgpt(api_key, text):
+def send_to_chatgpt(text):
+    api_key = os.getenv("OPENAI_API_KEY")  # Moved API key retrieval here
+    if not api_key:
+        raise ValueError("No API key found. Please set the OPENAI_API_KEY environment variable.")
+    
     url = "https://api.openai.com/v1/chat/completions"
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -52,11 +57,8 @@ def send_to_chatgpt(api_key, text):
         ],
         "max_tokens": 1500
     }
+    
     response = requests.post(url, headers=headers, json=data)
     response_json = response.json()
-    
-    if 'choices' not in response_json:
-        raise ValueError(f"Unexpected response format: {response_json}")
-    
     return response_json['choices'][0]['message']['content']
 
