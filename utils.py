@@ -1,12 +1,18 @@
-import requests
+import os 
 import tiktoken
 import pdfplumber
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-import os
+from openai import OpenAI
+from dotenv import load_dotenv
 
-MODEL = "gpt-4o"
+
+MODEL = "gpt-4o-mini"  # Update to later to gpt-4 or gpt-4o
+
 encoding = tiktoken.encoding_for_model(MODEL)
+
+load_dotenv()  # Load environment variables from .env file
+api_key = os.getenv("OPENAI_API_KEY")  # Get API key from environment variable
 
 def read_pdf(file_path):
     text = ""
@@ -41,24 +47,13 @@ def pdf_price(pdf_path, output_text, input_token_price=0.0000025, output_token_p
     }
 
 def send_to_chatgpt(text):
-    api_key = os.getenv("OPENAI_API_KEY")  # Moved API key retrieval here
-    if not api_key:
-        raise ValueError("No API key found. Please set the OPENAI_API_KEY environment variable.")
-    
-    url = "https://api.openai.com/v1/chat/completions"
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
-    }
-    data = {
-        "model": MODEL,
-        "messages": [
+    client = OpenAI(api_key=api_key)
+    completion = client.chat.completions.create(
+        model=MODEL,
+        store=True,
+        messages=[
             {"role": "user", "content": text}
-        ],
-        "max_tokens": 1500
-    }
-    
-    response = requests.post(url, headers=headers, json=data)
-    response_json = response.json()
-    return response_json['choices'][0]['message']['content']
+        ]
+    )
+    return completion['choices'][0]['message']['content']
 

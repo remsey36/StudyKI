@@ -1,6 +1,6 @@
 import os
 
-from utils import get_tokens, pdf_price, read_pdf, save_to_pdf, send_to_chatgpt
+from utils import  pdf_price, read_pdf, save_to_pdf, send_to_chatgpt
 
 # Set the OPENAI_API_KEY environment variable
 api_key = os.getenv("OPENAI_API_KEY")  # Get API key from environment variable
